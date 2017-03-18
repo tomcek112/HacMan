@@ -331,7 +331,6 @@ var player = new Player();
 
 
 var draw = function() {
-	//console.log(ctx.getImageData(gH.translateX(1), gH.translateY(1), 1 , 1));
 	ctx.clearRect(0, 0, width, height);
 	
 	// render movable scene
@@ -380,6 +379,5 @@ document.body.addEventListener("keyup", function (e) {
 });*/
 setInterval(draw, 100);
 
-console.log(ctx.getImageData(gH.translateX(1), gH.translateY(1), 1, 1).data)
 
 
