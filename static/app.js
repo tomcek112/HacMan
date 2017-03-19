@@ -223,7 +223,14 @@ var Player = function(){
 			if(dots[i].x == player.x && dots[i].y == player.y){
 				dots[i].x = numCols + 10;
 				dots[i].y = numRows + 10;
-				score++;
+				if(dots[i].isBigDot){
+					ghosts.forEach(function(e){
+						e.setEdible();
+					})
+				}
+				else {
+					score++;
+				}
 			}
 		}
 	}
@@ -481,6 +488,7 @@ var Ghost = function(color) {
 	this.reset = false;
 	this.ai = true;
 	this.canBeEaten = false;
+	this.edibleTime = 50;
 	
 	this.render = function() {
 		if(this.heading == "l"){
@@ -632,13 +640,28 @@ var Ghost = function(color) {
 		if (this.reset) {
 			this.resetPosition();
 		}
+		if(this.canBeEaten){
+			if(this.edibleTime == 0){
+				this.canBeEaten = false;
+				this.edibleTime = 50;
+			}
+			else {
+				this.edibleTime--;
+			}
+		}
 
+	}
+
+	this.setEdible = function() {
+		this.canBeEaten = true;
 	}
 }
 
 var ghostRed = new Ghost("red");
 var ghostBlue = new Ghost("blue");
 var ghostPink = new Ghost("pink");
+
+var ghosts = [ghostRed, ghostBlue, ghostPink];
 
 var draw = function() {
 	ctx.clearRect(0, 0, width, height);

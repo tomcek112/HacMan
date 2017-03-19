@@ -9,3 +9,14 @@
 body {
 	background-color: black;
 }
+
+@font-face { font-family: Crackman; src: url('http://127.0.0.1:5000/static/Pacmania.otf'); } 
+
+h1 {
+	font-family: Crackman;
+	color: yellow;
+	font-size: 5em;
+	margin-bottom: 0;
+	margin-top: -40px;
+	-webkit-text-stroke: 1px red;
+}
