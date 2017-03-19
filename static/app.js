@@ -453,30 +453,47 @@ var Ghost = function(color) {
 	if (this.color == "red") {
 		this.x = 13;
 		this.y = 15;
+		this.delay = 10;
 	} else if (this.color == "blue") {
 		this.x = 15;
 		this.y = 15;
+		this.delay = 15;
+	} else if (this.color == "pink") {
+		this.x = 17;
+		this.y = 15;
+		this.delay = 18;
 	}
 	this.heading;
 	this.counter = 0;
+	this.state = 0;
 	this.reset = false;
 	this.ai = true;
 	this.canBeEaten = false;
 	
-	this.render = function(color) {
+	this.render = function() {
 		if(this.heading == "l"){
-			var sprite=document.getElementById(color.concat("-l"));
+			var sprite=document.getElementById(this.color.concat("-l"));
 		}
 		else if(this.heading == "r"){
-			var sprite=document.getElementById(color.concat("-r"));
+			var sprite=document.getElementById(this.color.concat("-r"));
 		}
 		else if(this.heading == "u"){
-			var sprite=document.getElementById(color.concat("-u"));
+			var sprite=document.getElementById(this.color.concat("-u"));
 		}
 		else {
-			var sprite=document.getElementById(color.concat("-d"));
+			var sprite=document.getElementById(this.color.concat("-d"));
 		}
 		
+		if (this.canBeEaten) {
+			if (this.state == 0) {
+				var sprite=document.getElementById("vuln0")
+				this.state = 1;
+			} else if (this.state == 1) {
+				var sprite=document.getElementById("vuln1")
+				this.state = 0;
+			}
+		}
+
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
 
     	if (this.ai) {
@@ -528,14 +545,22 @@ var Ghost = function(color) {
 		}
 	}
 
+	this.oppositeDirection = function() {
+		if (this.heading == "l") {this.heading == "r";}
+		else if (this.heading == "r") {this.heading == "l";}
+		else if (this.heading == "u") {this.heading == "d";}
+		else if (this.heading == "d") {this.heading == "u";}
+	}
+
 	this.leaveSafe = function() {
 		this.changeDirection("u");
-		if (this.counter > 10 && this.counter < 17) {
+		if (this.counter > this.delay && this.counter < this.delay+7) {
 			this.y -= 1;
 		}
 	}
 
 	this.move = function() {
+		if (this.canBeEaten) {this.oppositeDirection();}
 		if (!canMove(this, this.heading)) {
 			var dir = this.getDir();
 			while(!canMove(this, dir)) {
@@ -555,14 +580,22 @@ var Ghost = function(color) {
 		else if(this.heading == "d"){
 			this.y += 0.5;
 		}
-
 	}
 
 	this.resetPosition = function() {
-		this.x = 13;
-		this.y = 15;
+		if (this.color == "red") {
+			this.x = 13;
+			this.y = 15;
+		} else if (this.color == "blue") {
+			this.x = 15;
+			this.y = 15;
+		} else if (this.color == "pink") {
+			this.x = 17;
+			this.y = 15;
+		}
 		this.counter = 0;
 		this.reset = false;
+		this.canBeEaten = false;
 	}
 
 	this.collide = function(a,b) {
@@ -570,15 +603,19 @@ var Ghost = function(color) {
 	}
 
 	this.run = function() {
-		if (this.counter <17) {
+		if (this.counter < this.delay +7) {
 			this.leaveSafe();
 		}
-		if (this.counter > 16 && !this.reset) {
+		if (this.counter > this.delay + 6 && !this.reset) {
 			this.move();
 		}
 		this.counter += 1;
 		if (this.collide(player.x, player.y)) {
-			player.resetPosition();
+			if (this.canBeEaten) {
+				this.reset = true;
+			} else {
+				player.resetPosition();
+			}
 		}
 		if (this.reset) {
 			this.resetPosition();
@@ -589,6 +626,7 @@ var Ghost = function(color) {
 
 var ghostRed = new Ghost("red");
 var ghostBlue = new Ghost("blue");
+var ghostPink = new Ghost("pink");
 
 var draw = function() {
 	ctx.clearRect(0, 0, width, height);
@@ -602,8 +640,9 @@ var draw = function() {
 	})
 
 	player.render();
-	ghostRed.render("red");
-	ghostBlue.render("blue");
+	ghostRed.render();
+	ghostBlue.render();
+	ghostPink.render();
 
 	// listen to inputs
 
