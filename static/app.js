@@ -214,7 +214,6 @@ obstacles.push(new Rectangle(
 	4, 3
 	));
 
-
 obstacles.push(new Rectangle(
 	new Point(9, 3),
 	5, 3
@@ -326,7 +325,6 @@ obstacles.push(new Rectangle(
 	4, 3
 	));
 
-
 obstacles.push(new Rectangle(
 	new Point(9, 27),
 	5, 3
@@ -369,14 +367,81 @@ var pointInObstacle = function(x,y) {
 	return false;
 }
 
-var canMove = function(dir) {
-	var nextPost = player.getNextPos(dir);
+//Passes player/ghost object
+var canMove = function(ob, dir) {
+	var nextPost = ob.getNextPos(dir);
 	if (nextPost.x == 0 && dir == "l") {return false;}
 	if (nextPost.x == numCols-2 && dir == "r") {return false;}
 	if (nextPost.y == 0 && dir == "u") {return false;}
 	if (nextPost.y == numRows-2 && dir == "d") {return false;}
 	return !pointInObstacle(nextPost.x, nextPost.y);
 }
+
+//Ghost object
+var Ghost = function(color) {
+	this.color = color; 
+	this.x = 13;
+	this.y = 15;
+	this.heading;
+	
+	this.render = function() {
+		if(this.heading == "l"){
+			var sprite=document.getElementById("red-l");
+		}
+		else if(this.heading == "r"){
+			var sprite=document.getElementById("red-r");
+		}
+		else if(this.heading == "u"){
+			var sprite=document.getElementById("red-u");
+		}
+		else {
+			var sprite=document.getElementById("red-d");
+		}
+		
+    	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
+
+	}
+
+	this.getNextPos = function(dir) {
+		var a = this.x;
+		var b = this.y;
+		if(dir == "l"){
+			a -= 1;
+		}
+		else if (dir == "r"){
+			a += 1;
+		}
+		else if (dir == "u"){
+			b -= 1;
+		}
+		else if(dir == "d"){
+			b += 1;
+		}
+		var pnt = new Point(a,b);
+		return pnt;
+	}
+	
+
+	this.getDir = function() {
+		//Generate random number between 0 and 4
+		var randNum = Math.floor(Math.random() * (4));
+		if (randNum == 0) { return "l";}
+		else if(randNum == 1) {return "r";}
+		else if(randNum == 2) {return "u";}
+		else if(randNum == 3) {return "d";}
+	}
+
+	this.move = function() {
+		
+	}
+
+	this.reset = function() {
+		this.x = 13;
+		this.y = 15;
+	}
+}
+
+var ghostRed = new Ghost("red");
 
 var draw = function() {
 	ctx.clearRect(0, 0, width, height);
@@ -386,27 +451,29 @@ var draw = function() {
 	})
 
 	player.render();
+	ghostRed.render();
+
 
 	//console.log(obstacles[20].pointInRectangle(player.x, player.y));
 	//console.log(pointInObstacle(player.x,player.y));
-	console.log("r", canMove("r"));
-	console.log("l", canMove("l"));
-	console.log("u", canMove("u"));
-	console.log("d", canMove("d"));
+	console.log("r", canMove(player,"r"));
+	console.log("l", canMove(player,"l"));
+	console.log("u", canMove(player,"u"));
+	console.log("d", canMove(player,"d"));
 	// listen to inputs
 
-	if ((keys[39] || keys[68]) && canMove("r") ) {
+	if ((keys[39] || keys[68]) && canMove(player,"r") ) {
 		// right arrow
 		player.move("r");
 	}
-	if ((keys[37] || keys[65]) && canMove("l")) {
+	if ((keys[37] || keys[65]) && canMove(player,"l")) {
 		// left arrow
 		player.move("l");
 	}
-	if (keys[38] && canMove("u")){
+	if (keys[38] && canMove(player,"u")){
 		player.move("u");
 	}
-	if (keys[40] && canMove("d")){
+	if (keys[40] && canMove(player,"d")){
 		player.move("d");
 	}
 
