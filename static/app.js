@@ -8,6 +8,8 @@ var canvas = document.getElementById("canvas"),
 	numRows = 33,
 	numCols = 33,
 	backgroundColor = "black",
+	dotSize = 4,
+	score = 0,
 	wallThickness = 3;
 
 // set canvas
@@ -180,17 +182,18 @@ var Player = function(){
 	// moves player
 	this.move = function(dir) {
 		if(this.heading == "l"){
-			player.x -= 1;
+			this.x -= 1;
 		}
 		else if (this.heading == "r"){
-			player.x += 1;
+			this.x += 1;
 		}
 		else if (this.heading == "u"){
-			player.y -= 1;
+			this.y -= 1;
 		}
 		else if(this.heading == "d"){
-			player.y += 1;
+			this.y += 1;
 		}
+		this.eat();
 	}
 
 	// changes direction
@@ -214,6 +217,30 @@ var Player = function(){
 		this.y = 22;
 	}
 
+	this.eat = function() {
+		for(var i = 0; i < dots.length; i++){
+			if(dots[i].x == player.x && dots[i].y == player.y){
+				dots[i].x = numCols + 10;
+				dots[i].y = numRows + 10;
+				score++;
+			}
+		}
+	}
+
+}
+
+var Dot =  function(x, y){
+	this.x = x;
+	this.y = y;
+
+	this.render = function(color) {
+		ctx.fillStyle = color;
+		var tempP = gH.castPoint(this);
+		//ctx.fillRect(tempP.x + dotSize, tempP.y + dotSize, dotSize, dotSize );
+		ctx.beginPath();
+		ctx.arc(tempP.x + dotSize*5, tempP.y + dotSize*5, dotSize, 0, 2 * Math.PI, false);
+		ctx.fill();
+	}
 }
 
 
@@ -376,6 +403,25 @@ obstacles.push(new Rectangle(
 	9, 11
 	));
 
+// Dots
+
+dots = [];
+
+for(var a = 1; a < numRows - 2; a++){
+	for(var b = 1; b < numCols - 2; b++){
+		var isDotSpot = true;
+		for (var c = 0; c < obstacles.length; c++) {
+			if (obstacles[c] instanceof Rectangle && obstacles[c].pointInRectangle(a,b)) {
+				isDotSpot = false;
+			}
+		}
+		if(isDotSpot){
+			dots.push(new Dot(a,b));
+		}
+	}
+}
+
+console.log(dots);
 
 
 
@@ -549,6 +595,10 @@ var draw = function() {
 	// render movable scene
 	obstacles.forEach(function(e){
 		e.render("blue");
+	})
+
+	dots.forEach(function(e){
+		e.render("white");
 	})
 
 	player.render();
