@@ -704,6 +704,7 @@ var draw = function() {
 		score++;
 		setTimeout(function(){},100);
 		draw();
+		document.getElementById("p1win").style.display = "block";
 	}
 
 	//requestAnimationFrame(draw);
