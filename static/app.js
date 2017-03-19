@@ -531,7 +531,11 @@ var Ghost = function(color) {
 			var sprite=document.getElementById(this.color.concat("-u"));
 		}
 		else {
-			var sprite=document.getElementById(this.color.concat("-d"));
+			if (!this.ai) {
+				var sprite=document.getElementById(this.color.concat("-r"));
+			} else {
+				var sprite=document.getElementById(this.color.concat("-d"));
+			}
 		}
 		
 		if (this.canBeEaten) {
@@ -572,8 +576,8 @@ var Ghost = function(color) {
 	}
 	
 	this.getDir = function() {
-		//Generate random number between 0 and 4
-		var randNum = Math.floor(Math.random() * (4));
+		//Generate random number between 0 and 3
+		var randNum = Math.floor(Math.random() * (3));
 		if (randNum == 0) { return "l";}
 		else if(randNum == 1) {return "r";}
 		else if(randNum == 2) {return "u";}
@@ -720,8 +724,16 @@ var ghostBlue = new Ghost("blue");
 var ghostPink = new Ghost("pink");
 ghostPink.ai = false;
 
+var choosePlayerGhost = function() {
+	var randNum = Math.floor(Math.random() * (3));
+	if (randNum == 0) {return ghostRed;}
+	else if (randNum == 1) {return ghostBlue;}
+	else if (randNum == 2) {return ghostPink;}
+}
+
 var ghosts = [ghostRed, ghostBlue, ghostPink];
 
+var playerGhost;
 var start = true;
 var draw = function() {
 	if (start) {
@@ -730,6 +742,10 @@ var draw = function() {
 		ghostBlue.delay += 30;
 		ghostPink.delay += 30;
 		start = false;
+		playerGhost = choosePlayerGhost();
+		playerGhost.ai = false;
+		playerGhost.heading = "r";
+		console.log(playerGhost);
 	}
 
 	ctx.clearRect(0, 0, width, height);
@@ -769,22 +785,22 @@ var draw = function() {
 	}
 	
 	//ghost controller
-	if (keys[68] && canMove(ghostPink,"r") ) {
+	if (keys[68] && canMove(playerGhost,"r") ) {
 		// right arrow
-		ghostPink.changeDirection("r");
+		playerGhost.changeDirection("r");
 	}
-	if (keys[65] && canMove(ghostPink,"l")) {
+	if (keys[65] && canMove(playerGhost,"l")) {
 		// left arrow
-		ghostPink.changeDirection("l");
+		playerGhost.changeDirection("l");
 	}
-	if (keys[87] && canMove(ghostPink,"u")){
-		ghostPink.changeDirection("u");
+	if (keys[87] && canMove(playerGhost,"u")){
+		playerGhost.changeDirection("u");
 	}
-	if (keys[83] && canMove(ghostPink,"d")){
-		ghostPink.changeDirection("d");
+	if (keys[83] && canMove(playerGhost,"d")){
+		playerGhost.changeDirection("d");
 	}
-	if(canMove(ghostPink, ghostPink.heading)){
-		 ghostPink.move();
+	if(canMove(playerGhost, playerGhost.heading)){
+		 playerGhost.move();
 	}
 
 	if(score == 300){
