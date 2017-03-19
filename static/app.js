@@ -649,7 +649,6 @@ var Ghost = function(color) {
 		}
 
 	}
-<<<<<<< HEAD
 	this.playerRun = function() {
 		if (this.counter < this.delay +6) {
     		this.leaveSafe();
@@ -662,11 +661,9 @@ var Ghost = function(color) {
 				this.resetPosition();
 			}
 		}
-=======
-
+	}
 	this.setEdible = function() {
 		this.canBeEaten = true;
->>>>>>> 2ea3ba8dc1048056d82b530cb2889491df85f287
 	}
 }
 
