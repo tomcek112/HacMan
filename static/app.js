@@ -722,7 +722,6 @@ var Ghost = function(color) {
 var ghostRed = new Ghost("red");
 var ghostBlue = new Ghost("blue");
 var ghostPink = new Ghost("pink");
-ghostPink.ai = false;
 
 var choosePlayerGhost = function() {
 	var randNum = Math.floor(Math.random() * (3));
