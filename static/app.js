@@ -692,7 +692,7 @@ var Ghost = function(color) {
     	this.counter++
     	if (this.collide(player.x, player.y)) {
 			if (this.canBeEaten) {
-				score = -1;
+				score = -10;
 				player.resetPosition();
 			} else {
 				this.resetPosition();
@@ -795,7 +795,7 @@ var draw = function() {
 		document.getElementById("p1win").style.display = "block";
 	}
 
-	if(score == -1){
+	if(score < 0){
 		clearInterval(loop);
 		score++;
 		setTimeout(function(){},100);
