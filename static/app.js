@@ -18,6 +18,23 @@ canvas.width = width;
 canvas.height = height;
 canvas.style.backgroundColor = backgroundColor;
 
+//Audio files
+var audioStart = document.getElementById("start");
+audioStart.loop = false;
+audioStart.pause();
+var audioEat = document.getElementById("eat");
+audioEat.loop = false;
+audioEat.pause();
+var audioDeath = document.getElementById("death");
+audioDeath.loop = false;
+audioDeath.pause();
+var audioEatGhost = document.getElementById("eat-ghost");
+audioEatGhost.loop = false;
+audioEatGhost.pause();
+var audioEatPill = document.getElementById("eat-pill");
+audioEatPill.loop = false;
+audioEatPill.pause();
+
 
 // global object to help transform grid values to pixel values for rendering
 var GridHelper = function(){
@@ -126,8 +143,11 @@ var Rectangle = function(p1, rectWidth, rectHeight){
 var Player = function(){
 	this.x = 16;
 	this.y = 22;
-	this.heading = "l";
+	this.heading;
 	this.spriteState = 0;
+	this.delay = 50;
+	this.start = true;
+	this.eatDelay;
 
 	this.render = function() {
 
@@ -158,6 +178,12 @@ var Player = function(){
 		}
 		
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
+
+    	if (this.delay == 0 && !start) {
+    		this.heading = "l";
+    	}
+    	this.delay--;
+
 	}
 
 	// gets next position to be moved to
@@ -199,6 +225,9 @@ var Player = function(){
 
 	// changes direction
 	this.changeDirection = function(dir) {
+		if(this.eatDelay > 0) {
+			this.heading = null;
+		}
 		if(dir == "l"){
 			this.heading = "l";
 		}
@@ -224,12 +253,15 @@ var Player = function(){
 				dots[i].x = numCols + 10;
 				dots[i].y = numRows + 10;
 				if(dots[i].isBigDot){
+					audioEatPill.play();
 					ghosts.forEach(function(e){
 						e.setEdible();
 					})
 				}
 				else {
+					audioEat.play();
 					score++;
+					this.eatDelay = 4;
 				}
 			}
 		}
@@ -630,8 +662,10 @@ var Ghost = function(color) {
 		this.counter += 1;
 		if (this.collide(player.x, player.y)) {
 			if (this.canBeEaten) {
+				audioEatGhost.play();
 				this.reset = true;
 			} else {
+				audioDeath.play();
 				player.resetPosition();
 			}
 		}
@@ -687,7 +721,16 @@ var ghostPink = new Ghost("pink");
 
 var ghosts = [ghostRed, ghostBlue, ghostPink];
 
+var start = true;
 var draw = function() {
+	if (start) {
+		audioStart.play();
+		ghostRed.delay += 30;
+		ghostBlue.delay += 30;
+		ghostPink.delay += 30;
+		start = false;
+	}
+
 	ctx.clearRect(0, 0, width, height);
 	// render movable scene
 	obstacles.forEach(function(e){
@@ -701,8 +744,8 @@ var draw = function() {
 	player.render();
 	ghostRed.render();
 	ghostBlue.render();
-	ghostPink.ai = false;
 	ghostPink.render();
+
 
 	// listen to inputs
 
