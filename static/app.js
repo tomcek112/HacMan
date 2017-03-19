@@ -434,8 +434,6 @@ for(var a = 1; a < numRows - 2; a++){
 	}
 }
 
-console.log(dots);
-
 
 var player = new Player();
 
@@ -507,11 +505,11 @@ var Ghost = function(color) {
 		}
 
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
-
     	if (this.ai) {
     		this.run();
+    	} else {
+    		this.playerRun();
     	}
-
 	}
 
 	this.getNextPos = function(dir) {
@@ -634,6 +632,19 @@ var Ghost = function(color) {
 		}
 
 	}
+	this.playerRun = function() {
+		if (this.counter < this.delay +6) {
+    		this.leaveSafe();
+    	}
+    	this.counter++
+    	if (this.collide(player.x, player.y)) {
+			if (this.canBeEaten) {
+				player.resetPosition();
+			} else {
+				this.resetPosition();
+			}
+		}
+	}
 }
 
 var ghostRed = new Ghost("red");
@@ -654,15 +665,16 @@ var draw = function() {
 	player.render();
 	ghostRed.render();
 	ghostBlue.render();
+	ghostPink.ai = false;
 	ghostPink.render();
 
 	// listen to inputs
 
-	if ((keys[39] || keys[68]) && canMove(player,"r") ) {
+	if (keys[39] && canMove(player,"r") ) {
 		// right arrow
 		player.changeDirection("r");
 	}
-	if ((keys[37] || keys[65]) && canMove(player,"l")) {
+	if (keys[37] && canMove(player,"l")) {
 		// left arrow
 		player.changeDirection("l");
 	}
@@ -676,6 +688,25 @@ var draw = function() {
 		 player.move();
 	}
 	
+	//ghost controller
+	if (keys[68] && canMove(ghostPink,"r") ) {
+		// right arrow
+		ghostPink.changeDirection("r");
+	}
+	if (keys[65] && canMove(ghostPink,"l")) {
+		// left arrow
+		ghostPink.changeDirection("l");
+	}
+	if (keys[87] && canMove(ghostPink,"u")){
+		ghostPink.changeDirection("u");
+	}
+	if (keys[83] && canMove(ghostPink,"d")){
+		ghostPink.changeDirection("d");
+	}
+	if(canMove(ghostPink, ghostPink.heading)){
+		 ghostPink.move();
+	}
+
 	if(score == 300){
 		clearInterval(loop);
 		score++;
