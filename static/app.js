@@ -9,6 +9,7 @@ var canvas = document.getElementById("canvas"),
 	numCols = 33,
 	backgroundColor = "black",
 	dotSize = 4,
+	bigDotSize = 8,
 	score = 0,
 	wallThickness = 3;
 
@@ -229,18 +230,25 @@ var Player = function(){
 
 }
 
-var Dot =  function(x, y){
+var Dot =  function(x, y, isBigDot){
 	this.x = x;
 	this.y = y;
+	this.isBigDot = isBigDot;
 
 	this.render = function(color) {
 		ctx.fillStyle = color;
 		var tempP = gH.castPoint(this);
 		//ctx.fillRect(tempP.x + dotSize, tempP.y + dotSize, dotSize, dotSize );
 		ctx.beginPath();
-		ctx.arc(tempP.x + dotSize*5, tempP.y + dotSize*5, dotSize, 0, 2 * Math.PI, false);
+		if(this.isBigDot){
+			ctx.arc(tempP.x + bigDotSize*2.5, tempP.y + bigDotSize*2.5, bigDotSize, 0, 2 * Math.PI, false);
+		}
+		else {
+			ctx.arc(tempP.x + dotSize*5, tempP.y + dotSize*5, dotSize, 0, 2 * Math.PI, false);
+		}
 		ctx.fill();
 	}
+
 }
 
 
@@ -407,6 +415,8 @@ obstacles.push(new Rectangle(
 
 dots = [];
 
+// add dots where point in grid is not in rectangle
+
 for(var a = 1; a < numRows - 2; a++){
 	for(var b = 1; b < numCols - 2; b++){
 		var isDotSpot = true;
@@ -416,13 +426,15 @@ for(var a = 1; a < numRows - 2; a++){
 			}
 		}
 		if(isDotSpot){
-			dots.push(new Dot(a,b));
+			dots.push(new Dot(a,b,false));
+			if((a == 1 && b == 3) || (a == numRows - 3 && b == 3) || (a == 1 && b == numCols - 5) || (a == numRows - 3 && b == numCols - 5) || (a == 21 && b == 16) || (a == 10 && b == 16)) {
+				dots.push(new Dot(a,b,true));
+			}
 		}
 	}
 }
 
 console.log(dots);
-
 
 
 var player = new Player();
@@ -664,6 +676,12 @@ var draw = function() {
 		 player.move();
 	}
 	
+	if(score == 300){
+		clearInterval(loop);
+		score++;
+		setTimeout(function(){},100);
+		draw();
+	}
 
 	//requestAnimationFrame(draw);
 }
@@ -682,7 +700,8 @@ document.body.addEventListener("keyup", function (e) {
 /*window.addEventListener("load", function () {
 	draw();
 });*/
-setInterval(draw, 100);
+var loop = setInterval(draw, 100);
+
 /*obstacles = [];
 var r = new Rectangle(new Point(1,1), 3,3);
 var r2 = new Rectangle(new Point(5,5), 3,3);
