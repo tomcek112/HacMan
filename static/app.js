@@ -15,6 +15,8 @@ canvas.width = width;
 canvas.height = height;
 canvas.style.backgroundColor = backgroundColor;
 
+
+// global object to help transform grid values to pixel values for rendering
 var GridHelper = function(){
 	this.castPoint = function(p){
 		var retPoint = new Point(
@@ -53,7 +55,7 @@ var Point = function(x,y){
 // Wall Object
 
 var Wall = function(p1, p2){
-	//Always initliaize with left most point as p1 
+	//Always initliaize with left most, top most point as p1 
 	if(!(p1 instanceof Point) ||!(p2 instanceof Point)) {
 		throw new TypeError('Construct <Wall> using Wall(Point p1, Points p2)');
 	}
@@ -83,6 +85,7 @@ var Rectangle = function(p1, rectWidth, rectHeight){
 	this.rectWidth = rectWidth;
 	this.rectHeight = rectHeight;
 
+	// draws rectangle with rounded edges
 	this.drawRoundRect = function (x, y, width, height, radius) {
 		ctx.strokeStyle = "blue";
 		ctx.lineWidth = wallThickness;
@@ -121,8 +124,11 @@ var Player = function(){
 	this.x = 24;
 	this.y = 25;
 	this.heading = "l";
+	this.spriteState = 0;
 
 	this.render = function() {
+
+		// get appropriate sprite for direction facing
 		if(this.heading == "l"){
 			var sprite=document.getElementById("sprite-l");
 		}
@@ -135,11 +141,24 @@ var Player = function(){
 		else {
 			var sprite=document.getElementById("sprite-d");
 		}
+
+		// open/close mouth
+		if(this.spriteState > 2){
+			this.spriteState++;
+			if(this.spriteState == 4){
+				this.spriteState = 0;
+			}
+			var sprite=document.getElementById("sprite-c");
+		}
+		else{
+			this.spriteState++;
+		}
 		
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
 
 	}
 
+	// gets next position to be moved to
 	this.getNextPos = function(dir) {
 		var a = player.x;
 		var b = player.y;
@@ -159,22 +178,35 @@ var Player = function(){
 		return pnt;
 	}
 
+	// moves player
 	this.move = function(dir) {
+		if(this.heading == "l"){
+			player.x -= 1;
+		}
+		else if (this.heading == "r"){
+			player.x += 1;
+		}
+		else if (this.heading == "u"){
+			player.y -= 1;
+		}
+		else if(this.heading == "d"){
+			player.y += 1;
+		}
+	}
+
+	// changes direction
+	this.changeDirection = function(dir) {
 		if(dir == "l"){
 			this.heading = "l";
-			player.x -= 1;
 		}
 		else if (dir == "r"){
 			this.heading = "r";
-			player.x += 1;
 		}
 		else if (dir == "u"){
 			this.heading = "u";
-			player.y -= 1;
 		}
 		else if(dir == "d"){
 			this.heading = "d"
-			player.y += 1;
 		}
 	}
 
@@ -245,7 +277,7 @@ obstacles.push(new Rectangle(
 
 obstacles.push(new Rectangle(
 	new Point(9, 8),
-	1, 7
+	1, 8
 	));
 
 obstacles.push(new Rectangle(
@@ -255,7 +287,7 @@ obstacles.push(new Rectangle(
 
 obstacles.push(new Rectangle(
 	new Point(23, 8),
-	1, 7
+	1, 8
 	));
 
 obstacles.push(new Rectangle(
@@ -270,21 +302,11 @@ obstacles.push(new Rectangle(
 	6, 7
 	));
 
-
-obstacles.push(new Rectangle(
-	new Point(9, 8),
-	1, 7
-	));
-
 obstacles.push(new Rectangle(
 	new Point(12, 8),
 	9, 1
 	));
 
-obstacles.push(new Rectangle(
-	new Point(23, 8),
-	1, 7
-	));
 
 obstacles.push(new Rectangle(
 	new Point(26, 13),
@@ -387,28 +409,27 @@ var draw = function() {
 
 	player.render();
 
-	//console.log(obstacles[20].pointInRectangle(player.x, player.y));
-	//console.log(pointInObstacle(player.x,player.y));
-	console.log("r", canMove("r"));
-	console.log("l", canMove("l"));
-	console.log("u", canMove("u"));
-	console.log("d", canMove("d"));
+
 	// listen to inputs
 
 	if ((keys[39] || keys[68]) && canMove("r") ) {
 		// right arrow
-		player.move("r");
+		player.changeDirection("r");
 	}
 	if ((keys[37] || keys[65]) && canMove("l")) {
 		// left arrow
-		player.move("l");
+		player.changeDirection("l");
 	}
 	if (keys[38] && canMove("u")){
-		player.move("u");
+		player.changeDirection("u");
 	}
 	if (keys[40] && canMove("d")){
-		player.move("d");
+		player.changeDirection("d");
 	}
+	if(canMove(player.heading)){
+		 player.move();
+	}
+	
 
 	//requestAnimationFrame(draw);
 }
