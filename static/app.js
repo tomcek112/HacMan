@@ -121,8 +121,8 @@ var Rectangle = function(p1, rectWidth, rectHeight){
 // Player Object
 
 var Player = function(){
-	this.x = 24;
-	this.y = 25;
+	this.x = 16;
+	this.y = 22;
 	this.heading = "l";
 	this.spriteState = 0;
 
@@ -155,7 +155,6 @@ var Player = function(){
 		}
 		
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
-
 	}
 
 	// gets next position to be moved to
@@ -210,6 +209,11 @@ var Player = function(){
 		}
 	}
 
+	this.resetPosition = function() {
+		this.x = 16;
+		this.y = 22;
+	}
+
 }
 
 
@@ -240,7 +244,6 @@ obstacles.push(new Wall(
 // Inner Walls
 
 // first level
-
 obstacles.push(new Rectangle(
 	new Point(3, 3),
 	4, 3
@@ -272,7 +275,6 @@ obstacles.push(new Rectangle(
 	new Point(3, 8),
 	4, 3
 	));
-
 
 obstacles.push(new Rectangle(
 	new Point(9, 8),
@@ -402,25 +404,38 @@ var canMove = function(ob, dir) {
 //Ghost object
 var Ghost = function(color) {
 	this.color = color; 
-	this.x = 13;
-	this.y = 15;
+	if (this.color == "red") {
+		this.x = 13;
+		this.y = 15;
+	} else if (this.color == "blue") {
+		this.x = 15;
+		this.y = 15;
+	}
 	this.heading;
+	this.counter = 0;
+	this.reset = false;
+	this.ai = true;
+	this.canBeEaten = false;
 	
-	this.render = function() {
+	this.render = function(color) {
 		if(this.heading == "l"){
-			var sprite=document.getElementById("red-l");
+			var sprite=document.getElementById(color.concat("-l"));
 		}
 		else if(this.heading == "r"){
-			var sprite=document.getElementById("red-r");
+			var sprite=document.getElementById(color.concat("-r"));
 		}
 		else if(this.heading == "u"){
-			var sprite=document.getElementById("red-u");
+			var sprite=document.getElementById(color.concat("-u"));
 		}
 		else {
-			var sprite=document.getElementById("red-d");
+			var sprite=document.getElementById(color.concat("-d"));
 		}
 		
     	ctx.drawImage(sprite,gH.translateX(this.x),gH.translateY(this.y), gH.translateX(2), gH.translateY(2));
+
+    	if (this.ai) {
+    		this.run();
+    	}
 
 	}
 
@@ -443,7 +458,6 @@ var Ghost = function(color) {
 		return pnt;
 	}
 	
-
 	this.getDir = function() {
 		//Generate random number between 0 and 4
 		var randNum = Math.floor(Math.random() * (4));
@@ -453,17 +467,82 @@ var Ghost = function(color) {
 		else if(randNum == 3) {return "d";}
 	}
 
-	this.move = function() {
-		
+	this.changeDirection = function(dir) {
+		if(dir == "l"){
+			this.heading = "l";
+		}
+		else if (dir == "r"){
+			this.heading = "r";
+		}
+		else if (dir == "u"){
+			this.heading = "u";
+		}
+		else if(dir == "d"){
+			this.heading = "d"
+		}
 	}
 
-	this.reset = function() {
+	this.leaveSafe = function() {
+		this.changeDirection("u");
+		if (this.counter > 10 && this.counter < 17) {
+			this.y -= 1;
+		}
+	}
+
+	this.move = function() {
+		if (!canMove(this, this.heading)) {
+			var dir = this.getDir();
+			while(!canMove(this, dir)) {
+				dir = this.getDir();
+			}
+		}	
+		this.changeDirection(dir);
+		if(this.heading == "l"){
+			this.x -= 0.5;
+		}
+		else if (this.heading == "r"){
+			this.x += 0.5;
+		}
+		else if (this.heading == "u"){
+			this.y -= 0.5;
+		}
+		else if(this.heading == "d"){
+			this.y += 0.5;
+		}
+
+	}
+
+	this.resetPosition = function() {
 		this.x = 13;
 		this.y = 15;
+		this.counter = 0;
+		this.reset = false;
+	}
+
+	this.collide = function(a,b) {
+		return (this.x <= a + 1 && this.x >= a-1) && (this.y <= b + 1 && this.y >= b-1);
+	}
+
+	this.run = function() {
+		if (this.counter <17) {
+			this.leaveSafe();
+		}
+		if (this.counter > 16 && !this.reset) {
+			this.move();
+		}
+		this.counter += 1;
+		if (this.collide(player.x, player.y)) {
+			player.resetPosition();
+		}
+		if (this.reset) {
+			this.resetPosition();
+		}
+
 	}
 }
 
 var ghostRed = new Ghost("red");
+var ghostBlue = new Ghost("blue");
 
 var draw = function() {
 	ctx.clearRect(0, 0, width, height);
@@ -473,10 +552,11 @@ var draw = function() {
 	})
 
 	player.render();
-	ghostRed.render();
+	ghostRed.render("red");
+	ghostBlue.render("blue");
 
 	// listen to inputs
-	
+
 	if ((keys[39] || keys[68]) && canMove(player,"r") ) {
 		// right arrow
 		player.changeDirection("r");
@@ -485,13 +565,13 @@ var draw = function() {
 		// left arrow
 		player.changeDirection("l");
 	}
-	if (keys[38] && canMove("u")){
+	if (keys[38] && canMove(player,"u")){
 		player.changeDirection("u");
 	}
-	if (keys[40] && canMove("d")){
+	if (keys[40] && canMove(player,"d")){
 		player.changeDirection("d");
 	}
-	if(canMove(player.heading)){
+	if(canMove(player, player.heading)){
 		 player.move();
 	}
 	
