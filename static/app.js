@@ -638,6 +638,8 @@ var Ghost = function(color) {
 		if (this.reset) {
 			this.resetPosition();
 		}
+
+		// timer for edbile state
 		if(this.canBeEaten){
 			if(this.edibleTime == 0){
 				this.canBeEaten = false;
@@ -656,9 +658,21 @@ var Ghost = function(color) {
     	this.counter++
     	if (this.collide(player.x, player.y)) {
 			if (this.canBeEaten) {
+				score = -1;
 				player.resetPosition();
 			} else {
 				this.resetPosition();
+			}
+		}
+
+		// timer for edbile state
+		if(this.canBeEaten){
+			if(this.edibleTime == 0){
+				this.canBeEaten = false;
+				this.edibleTime = 50;
+			}
+			else {
+				this.edibleTime--;
 			}
 		}
 	}
@@ -735,6 +749,14 @@ var draw = function() {
 		setTimeout(function(){},100);
 		draw();
 		document.getElementById("p1win").style.display = "block";
+	}
+
+	if(score == -1){
+		clearInterval(loop);
+		score++;
+		setTimeout(function(){},100);
+		draw();
+		document.getElementById("p2win").style.display = "block";
 	}
 
 	//requestAnimationFrame(draw);
