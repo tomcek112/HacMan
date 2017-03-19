@@ -108,14 +108,18 @@ var Rectangle = function(p1, rectWidth, rectHeight){
 		this.drawRoundRect(castedP1.x, castedP1.y, gH.translateX(rectWidth), gH.translateY(rectHeight), 10);
 	}
 
+	this.pointInRectangle = function(x, y) {
+		return (x >= p1.x - 1) && (x <= p1.x + rectWidth-1) && (y >= p1.y - 1) && (y <= p1.y + rectHeight-1);
+	}
+
 }
 
 
 // Player Object
 
 var Player = function(){
-	this.x = 17;
-	this.y = 13;
+	this.x = 24;
+	this.y = 25;
 	this.heading = "l";
 
 	this.render = function() {
@@ -136,6 +140,25 @@ var Player = function(){
 
 	}
 
+	this.getNextPos = function(dir) {
+		var a = player.x;
+		var b = player.y;
+		if(dir == "l"){
+			a -= 1;
+		}
+		else if (dir == "r"){
+			a += 1;
+		}
+		else if (dir == "u"){
+			b -= 1;
+		}
+		else if(dir == "d"){
+			b += 1;
+		}
+		var pnt = new Point(a,b);
+		return pnt;
+	}
+
 	this.move = function(dir) {
 		if(dir == "l"){
 			this.heading = "l";
@@ -154,6 +177,7 @@ var Player = function(){
 			player.y += 1;
 		}
 	}
+
 }
 
 
@@ -221,7 +245,7 @@ obstacles.push(new Rectangle(
 
 obstacles.push(new Rectangle(
 	new Point(9, 8),
-	1, 8
+	1, 7
 	));
 
 obstacles.push(new Rectangle(
@@ -231,7 +255,7 @@ obstacles.push(new Rectangle(
 
 obstacles.push(new Rectangle(
 	new Point(23, 8),
-	1, 8
+	1, 7
 	));
 
 obstacles.push(new Rectangle(
@@ -247,14 +271,20 @@ obstacles.push(new Rectangle(
 	));
 
 
-
+obstacles.push(new Rectangle(
+	new Point(9, 8),
+	1, 7
+	));
 
 obstacles.push(new Rectangle(
 	new Point(12, 8),
 	9, 1
 	));
 
-
+obstacles.push(new Rectangle(
+	new Point(23, 8),
+	1, 7
+	));
 
 obstacles.push(new Rectangle(
 	new Point(26, 13),
@@ -329,10 +359,27 @@ obstacles.push(new Rectangle(
 
 var player = new Player();
 
+var pointInObstacle = function(x,y) {
+	for (var i = 0; i < obstacles.length; i++) {
+		if (obstacles[i] instanceof Rectangle && obstacles[i].pointInRectangle(x,y)) {
+			return true;
+		}
+		
+	}
+	return false;
+}
+
+var canMove = function(dir) {
+	var nextPost = player.getNextPos(dir);
+	if (nextPost.x == 0 && dir == "l") {return false;}
+	if (nextPost.x == numCols-2 && dir == "r") {return false;}
+	if (nextPost.y == 0 && dir == "u") {return false;}
+	if (nextPost.y == numRows-2 && dir == "d") {return false;}
+	return !pointInObstacle(nextPost.x, nextPost.y);
+}
 
 var draw = function() {
 	ctx.clearRect(0, 0, width, height);
-	
 	// render movable scene
 	obstacles.forEach(function(e){
 		e.render("blue");
@@ -340,23 +387,26 @@ var draw = function() {
 
 	player.render();
 
-	var x = new Point(1,1);
-	x.render("white");
-
+	//console.log(obstacles[20].pointInRectangle(player.x, player.y));
+	//console.log(pointInObstacle(player.x,player.y));
+	console.log("r", canMove("r"));
+	console.log("l", canMove("l"));
+	console.log("u", canMove("u"));
+	console.log("d", canMove("d"));
 	// listen to inputs
 
-	if (keys[39] || keys[68]) {
+	if ((keys[39] || keys[68]) && canMove("r") ) {
 		// right arrow
 		player.move("r");
 	}
-	if (keys[37] || keys[65]) {
+	if ((keys[37] || keys[65]) && canMove("l")) {
 		// left arrow
 		player.move("l");
 	}
-	if (keys[38]){
+	if (keys[38] && canMove("u")){
 		player.move("u");
 	}
-	if (keys[40]){
+	if (keys[40] && canMove("d")){
 		player.move("d");
 	}
 
@@ -378,6 +428,13 @@ document.body.addEventListener("keyup", function (e) {
 	draw();
 });*/
 setInterval(draw, 100);
-
+/*obstacles = [];
+var r = new Rectangle(new Point(1,1), 3,3);
+var r2 = new Rectangle(new Point(5,5), 3,3);
+r.render();
+r2.render();
+obstacles.push(r);
+obstacles.push(r2);
+console.log(pointInObstacle(5,5));*/
 
 
